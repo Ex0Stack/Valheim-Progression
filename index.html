@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valheim Progression Flowcharts</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cinzel:wght@600;700&display=swap');
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;min-height:100%;background:#1a1830;font-family:'Inter',-apple-system,sans-serif;color:#e8e6f0;}
+body{
+  display:flex; flex-direction:column; align-items:center;
+  padding:10vh 20px 6vh;
+  background-image:radial-gradient(ellipse at 50% -10%, rgba(120,100,190,.18), transparent 60%);
+}
+h1{
+  font-family:'Cinzel',serif; font-weight:700; font-size:clamp(28px,4vw,44px);
+  letter-spacing:.02em; margin:0 0 10px; text-align:center; color:#f2f0fa;
+}
+p.sub{
+  margin:0 0 56px; color:rgba(232,230,240,.55); font-size:15px; text-align:center;
+}
+.chapters{
+  display:flex; flex-direction:column; gap:16px; width:100%; max-width:440px;
+}
+.chapter{
+  display:flex; align-items:center; gap:16px;
+  padding:20px 22px; border-radius:10px;
+  border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.03);
+  text-decoration:none; color:inherit;
+  transition:background .15s ease, border-color .15s ease, transform .15s ease;
+}
+.chapter:hover{
+  background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.2);
+  transform:translateX(3px);
+}
+.chapter:focus-visible{outline:2px solid #a89bd8; outline-offset:2px;}
+.chapter .mark{
+  font-family:'Cinzel',serif; font-size:13px; color:rgba(232,230,240,.4);
+  min-width:26px;
+}
+.chapter .name{font-size:17px; font-weight:600;}
+.chapter .desc{font-size:13px; color:rgba(232,230,240,.5); margin-top:2px;}
+.chapter .text{display:flex; flex-direction:column; gap:2px;}
+
+@media (prefers-reduced-motion: reduce){
+  .chapter{transition:none;}
+}
+</style>
+</head>
+<body>
+  <h1>Valheim Progression Flowcharts</h1>
+  <p class="sub">Pick a biome to open its flowchart</p>
+  <div class="chapters">
+    <a class="chapter" href="valheim_flowchart_mistlands.html">
+      <span class="mark">I</span>
+      <span class="text">
+        <span class="name">Mistlands</span>
+        <span class="desc">Dvergr ruins, Seekers, and the Black Forge</span>
+      </span>
+    </a>
+    <a class="chapter" href="valheim_flowchart_ashlands.html">
+      <span class="mark">II</span>
+      <span class="text">
+        <span class="name">Ashlands</span>
+        <span class="desc">Charred warriors and the volcanic front</span>
+      </span>
+    </a>
+    <a class="chapter" href="valheim_flowchart_deepnorth.html">
+      <span class="mark">III</span>
+      <span class="text">
+        <span class="name">Deep North</span>
+        <span class="desc">The frozen edge of the map</span>
+      </span>
+    </a>
+  </div>
+</body>
+</html>
