@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valheim Flowchart — Deep North</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;width:100%;height:100%;background:#0c1a2b;overflow:hidden;font-family:'Inter',-apple-system,sans-serif;}
+
+.chart-wrap{
+  position:fixed; inset:0; overflow:hidden; cursor:grab; touch-action:none; user-select:none;
+}
+.chart-wrap.grabbing{cursor:grabbing;}
+.chart-wrap .mermaid{position:absolute; top:0; left:0; transform-origin:0 0; will-change:transform; padding:30px;}
+.chart-wrap .mermaid svg{display:block;}
+.chart-wrap .mermaid .node{cursor:pointer;}
+.chart-wrap .mermaid .node:hover rect,
+.chart-wrap .mermaid .node:hover polygon{filter:brightness(1.3);}
+
+.mermaid .nodeLabel{padding:5px 9px !important; white-space:normal !important; word-break:normal !important; overflow-wrap:break-word !important; line-height:1.35 !important;}
+.mermaid foreignObject{overflow:visible !important;}
+
+.zoom-controls{position:fixed; top:16px; right:16px; z-index:10; display:flex; flex-direction:column; gap:6px;}
+.zoom-btn{
+  width:38px; height:38px; border-radius:6px; border:1px solid rgba(255,255,255,.22);
+  background:rgba(15,15,18,.85); color:#eee; font-size:18px; line-height:1; cursor:pointer;
+  backdrop-filter:blur(4px); font-family:inherit;
+}
+.zoom-btn:hover{background:rgba(35,35,42,.92);}
+.zoom-hint{
+  position:fixed; bottom:14px; left:16px; z-index:10; font-size:12px;
+  color:rgba(255,255,255,.55); pointer-events:none; max-width:70vw;
+}
+
+/* modal for grouped nodes */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.62); backdrop-filter:blur(3px);
+  display:none; align-items:center; justify-content:center; z-index:200; padding:24px;
+}
+.modal-overlay.open{display:flex;}
+.modal-panel{
+  background:#17171d; border:1px solid rgba(255,255,255,.16); border-radius:12px;
+  max-width:540px; width:100%; max-height:78vh; overflow-y:auto;
+  box-shadow:0 24px 70px rgba(0,0,0,.55);
+}
+.modal-header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:16px 20px; border-bottom:1px solid rgba(255,255,255,.12);
+  position:sticky; top:0; background:#17171d; border-radius:12px 12px 0 0;
+}
+.modal-header h3{margin:0; font-size:16px; color:#f2f2f5; font-weight:600;}
+.modal-close{background:none; border:none; color:#9a9aa5; font-size:24px; cursor:pointer; line-height:1; padding:2px 6px;}
+.modal-close:hover{color:#fff;}
+.modal-list{padding:8px;}
+.modal-item{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:12px 14px; margin:4px; border-radius:8px; cursor:pointer;
+  border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.035);
+  transition:background .15s, border-color .15s;
+}
+.modal-item:hover{background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.22);}
+.modal-item .txt{display:flex; flex-direction:column; gap:3px; min-width:0;}
+.modal-item .name{font-weight:600; color:#eee; font-size:14px;}
+.modal-item .stat{font-size:12px; color:#8fd3ec; line-height:1.4;}
+.modal-item .arrow{color:#888; font-size:15px; flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="chart-wrap" id="wrap">
+  <div class="zoom-controls">
+    <button class="zoom-btn" data-action="in" title="Zoom in">+</button>
+    <button class="zoom-btn" data-action="out" title="Zoom out">&minus;</button>
+    <button class="zoom-btn" data-action="reset" title="Fit to view">&#10530;</button>
+  </div>
+  <div class="zoom-hint">Scroll/pinch to zoom &middot; drag to pan &middot; click a node to open its wiki page (or pick an item, for grouped nodes)</div>
+  <div class="mermaid">
+flowchart TD
+classDef resource fill:#0f2b40,stroke:#8fd3ec,color:#dff3fa,stroke-width:1px;
+classDef mob fill:#2a1414,stroke:#e0776b,color:#f8dcd8,stroke-width:1px;
+classDef structure fill:#0c2035,stroke:#5f9bc4,color:#d4e8f5,stroke-width:1px;
+classDef station fill:#0d3040,stroke:#7ec8e3,color:#dff3fa,stroke-width:1px;
+classDef gear fill:#0a2838,stroke:#d8ecf5,color:#eaf7fc,stroke-width:1px;
+classDef boss fill:#0a1a40,stroke:#8fa8ff,color:#e4e9ff,stroke-width:3px;
+classDef gate fill:#111,stroke:#999,color:#ddd,stroke-width:1px,stroke-dasharray: 4 3;
+
+FaderRelicIn["Fader Relic<br/>(from Ashlands)"]:::gate
+EmberPile["Ember Pile"]:::station
+EmberCharges["Ember Charges"]:::resource
+Village["Abandoned Village<br/>(forward base)"]:::structure
+Gammeltroll["Gammeltroll<br/>(petrified corpse)"]:::mob
+PetrifiedTissue["Petrified Tissue"]:::resource
+BlastFurnaceD["Blast Furnace"]:::station
+Bloodgold["Bloodgold"]:::resource
+WindingTunnels["Winding Tunnels (dungeon)"]:::structure
+Frostcore["Frostcore"]:::resource
+Mould["Weapon / Armor Mould"]:::resource
+LuminousLarva["Luminous Larva"]:::resource
+FrigidKiln["Frigid Kiln"]:::station
+Ice["Ice"]:::resource
+LiquidFrost["Liquid Frost"]:::resource
+SmithApron["Black Forge —<br/>Smith's Apron"]:::station
+Cast["Cast"]:::resource
+FrostFoundry["Frost Foundry"]:::station
+NordGear["Nord Weapons + Nord Shields"]:::gear
+AncientAltar["Ancient Altar<br/>(duel an ancestor)"]:::structure
+ThunderbloodEss["Thunderblood Essence<br/>(melee ancestor)"]:::resource
+FrostfireEss["Frostfire Essence<br/>(magic ancestor)"]:::resource
+ThunderbloodGear["Thunderblood Weapons"]:::gear
+FrostfireGear["Frostfire Weapons"]:::gear
+Hexen["Hexen"]:::mob
+Nornathread["Nornathread"]:::resource
+Krigen["Krigen"]:::mob
+LeatherStraps["Leather Straps"]:::resource
+ArmorMould["Armor Mould<br/>(village wardrobes)"]:::resource
+ArmorD["Armor: Protector · Vanguard · Caller"]:::gear
+IntricateKey["Intricate Key ×3"]:::resource
+Morkhalla["Mörkhalla<br/>(locked dungeon)"]:::structure
+MaliciousIce["Malicious Ice"]:::resource
+MaliciousBlood["Malicious Blood ×3"]:::resource
+JotunInvasion["Jotun Invasion<br/>(survive ×3)"]:::structure
+AesirPassage["Aesir Passage —<br/>Strange Bowl"]:::structure
+Kall["KALL FIMBULBRINGER"]:::boss
+CrownJewel["Crown Jewel"]:::resource
+CrownValheim["Crown of Valheim"]:::gear
+SacrificialBlood["Sacrificial Blood"]:::resource
+SacrificialStones["Sacrificial Stones, Meadows<br/>(final capstone)"]:::gate
+Elaking["Elaking"]:::mob
+ElakingHair["Elaking Hair Bundle"]:::resource
+Moose["Moose<br/>(tameable, rideable)"]:::mob
+MooseDrops["Moose Meat / Hide / Sinew"]:::resource
+Seal["Seal"]:::mob
+SealDrops["Seal Pelt · Seal Blubber"]:::resource
+MooseSaddle["Moose Saddle<br/>(needed to tame &amp; ride)"]:::gear
+
+FaderRelicIn --> EmberPile --> EmberCharges
+Village --> Gammeltroll
+EmberCharges --> Gammeltroll --> PetrifiedTissue
+PetrifiedTissue --> BlastFurnaceD --> Bloodgold
+WindingTunnels --> Frostcore
+WindingTunnels --> Mould
+WindingTunnels --> LuminousLarva
+Frostcore --> FrigidKiln
+Ice --> FrigidKiln --> LiquidFrost
+Mould --> SmithApron
+Bloodgold --> SmithApron --> Cast
+Cast --> FrostFoundry
+LiquidFrost --> FrostFoundry --> NordGear
+AncientAltar --> ThunderbloodEss
+AncientAltar --> FrostfireEss
+NordGear --> ThunderbloodGear
+ThunderbloodEss --> ThunderbloodGear
+NordGear --> FrostfireGear
+FrostfireEss --> FrostfireGear
+Hexen --> Nornathread --> ArmorD
+Krigen --> LeatherStraps --> ArmorD
+Village --> ArmorMould --> ArmorD
+Mould --> IntricateKey
+Bloodgold --> IntricateKey
+IntricateKey --> Morkhalla
+Morkhalla --> MaliciousIce
+MaliciousIce --> MaliciousBlood
+MaliciousIce --> JotunInvasion
+MaliciousBlood --> AesirPassage --> Kall
+Kall --> CrownJewel --> CrownValheim
+Kall --> SacrificialBlood --> SacrificialStones
+Elaking --> ElakingHair --> ArmorD
+Moose --> MooseDrops
+Seal --> SealDrops --> MooseSaddle
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <h3 id="modalTitle"></h3>
+      <button class="modal-close" id="modalClose" title="Close">&times;</button>
+    </div>
+    <div class="modal-list" id="modalList"></div>
+  </div>
+</div>
+
+<script>
+  var NODE_DATA = {"FaderRelicIn": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Fader&go=Go"}, "EmberPile": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Ember%20Pile&go=Go"}, "EmberCharges": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Ember%20Charge&go=Go"}, "Village": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Abandoned%20Village&go=Go"}, "Gammeltroll": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Gammeltroll&go=Go"}, "PetrifiedTissue": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Petrified%20Tissue&go=Go"}, "BlastFurnaceD": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Blast%20Furnace&go=Go"}, "Bloodgold": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Bloodgold&go=Go"}, "WindingTunnels": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Winding%20Tunnels&go=Go"}, "Frostcore": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostcore&go=Go"}, "Mould": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Mould&go=Go"}, "LuminousLarva": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Luminous%20Larva&go=Go"}, "FrigidKiln": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frigid%20Kiln&go=Go"}, "Ice": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Ice&go=Go"}, "LiquidFrost": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Liquid%20Frost&go=Go"}, "SmithApron": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Black%20Forge&go=Go"}, "Cast": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Cast&go=Go"}, "FrostFoundry": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frost%20Foundry&go=Go"}, "AncientAltar": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Ancient%20Altar&go=Go"}, "ThunderbloodEss": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Essence&go=Go"}, "FrostfireEss": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Essence&go=Go"}, "Hexen": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Hexen&go=Go"}, "Nornathread": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nornathread&go=Go"}, "Krigen": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Krigen&go=Go"}, "LeatherStraps": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Leather%20Straps&go=Go"}, "ArmorMould": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Mould&go=Go"}, "IntricateKey": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Intricate%20Key&go=Go"}, "Morkhalla": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Morkhalla&go=Go"}, "MaliciousIce": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Malicious%20Ice&go=Go"}, "MaliciousBlood": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Malicious%20Blood&go=Go"}, "JotunInvasion": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Jotun%20Invasion&go=Go"}, "AesirPassage": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Aesir%20Passage&go=Go"}, "Kall": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Kall%20Fimbulbringer&go=Go"}, "CrownJewel": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Crown%20Jewel&go=Go"}, "CrownValheim": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Crown%20of%20Valheim&go=Go"}, "SacrificialBlood": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Sacrificial%20Blood&go=Go"}, "SacrificialStones": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Sacrificial%20Stone&go=Go"}, "Elaking": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Elaking&go=Go"}, "ElakingHair": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Elaking%20Hair%20Bundle&go=Go"}, "Moose": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Moose&go=Go"}, "Seal": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Seal&go=Go"}, "MooseSaddle": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Moose%20Saddle&go=Go"}, "NordGear": {"type": "group", "title": "Nord weapons & shields", "items": [{"name": "Nord Sword", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Sword&go=Go", "stat": null}, {"name": "Nord Greatsword", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Greatsword&go=Go", "stat": null}, {"name": "Nord Atgeir", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Atgeir&go=Go", "stat": null}, {"name": "Nord Mace", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Mace&go=Go", "stat": null}, {"name": "Nord Sledge", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Sledge&go=Go", "stat": null}, {"name": "Nord Axe", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Axe&go=Go", "stat": "266 dmg · Chop + Slash"}, {"name": "Nord Greataxe", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Greataxe&go=Go", "stat": null}, {"name": "Nord Spear", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Spear&go=Go", "stat": null}, {"name": "Nord Dagger", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Dagger&go=Go", "stat": "150 dmg · Pierce + Slash"}, {"name": "Nord Knucklechains", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Knucklechains&go=Go", "stat": "114 dmg · Blunt"}, {"name": "Nord Bow", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Bow&go=Go", "stat": null}, {"name": "Nord Crossbow", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Crossbow&go=Go", "stat": "444 dmg · Chop + Pierce"}, {"name": "Nord Buckler", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Buckler&go=Go", "stat": "shield"}, {"name": "Nord Shield", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Shield&go=Go", "stat": "shield"}, {"name": "Nord Greatshield", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nord%20Greatshield&go=Go", "stat": "shield"}, {"name": "Shield of Roots", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Shield%20of%20Roots&go=Go", "stat": "shield"}]}, "ThunderbloodGear": {"type": "group", "title": "Thunderblood weapons", "items": [{"name": "Thunderblood Sword", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Sword&go=Go", "stat": "225 dmg · Lightning + Slash"}, {"name": "Thunderblood Greatsword", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Greatsword&go=Go", "stat": "265 dmg · Lightning + Slash"}, {"name": "Thunderblood Atgeir", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Atgeir&go=Go", "stat": null}, {"name": "Thunderblood Mace", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Mace&go=Go", "stat": null}, {"name": "Thunderblood Sledge", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Sledge&go=Go", "stat": null}, {"name": "Thunderblood Axe", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Axe&go=Go", "stat": "321 dmg · Chop + Lightning + Slash"}, {"name": "Thunderblood Greataxe", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Greataxe&go=Go", "stat": "283 dmg · Chop + Lightning + Slash"}, {"name": "Thunderblood Spear", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Spear&go=Go", "stat": "225 dmg · Lightning + Pierce"}, {"name": "Thunderblood Dagger", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Dagger&go=Go", "stat": "205 dmg · Lightning + Pierce + Slash"}, {"name": "Thunderblood Knucklechains", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Knucklechains&go=Go", "stat": "167 dmg · Blunt + Lightning"}, {"name": "Thunderblood Bow", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Bow&go=Go", "stat": null}, {"name": "Thunderblood Crossbow", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Thunderblood%20Crossbow&go=Go", "stat": "499 dmg · Chop + Lightning + Pierce"}]}, "FrostfireGear": {"type": "group", "title": "Frostfire weapons", "items": [{"name": "Frostfire Sword", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Sword&go=Go", "stat": "238 dmg · Fire + Frost + Slash"}, {"name": "Frostfire Greatsword", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Greatsword&go=Go", "stat": "286 dmg · Fire + Frost + Slash"}, {"name": "Frostfire Atgeir", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Atgeir&go=Go", "stat": null}, {"name": "Frostfire Mace", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Mace&go=Go", "stat": null}, {"name": "Frostfire Sledge", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Sledge&go=Go", "stat": null}, {"name": "Frostfire Axe", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Axe&go=Go", "stat": null}, {"name": "Frostfire Greataxe", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Greataxe&go=Go", "stat": "294 dmg · Chop + Fire + Frost + Slash"}, {"name": "Frostfire Spear", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Spear&go=Go", "stat": "248 dmg · Fire + Frost + Pierce"}, {"name": "Frostfire Dagger", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Dagger&go=Go", "stat": null}, {"name": "Frostfire Knucklechains", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Knucklechains&go=Go", "stat": "180 dmg · Blunt + Fire + Frost"}, {"name": "Frostfire Bow", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Bow&go=Go", "stat": "178 dmg · Fire + Frost + Pierce + Spirit"}, {"name": "Frostfire Crossbow", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Frostfire%20Crossbow&go=Go", "stat": "512 dmg · Chop + Fire + Frost + Pierce"}]}, "ArmorD": {"type": "group", "title": "Deep North armor", "items": [{"name": "Protector Set", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Protector%20Set&go=Go", "stat": "heaviest of the three · highest base armor, raw defense"}, {"name": "Vanguard Set", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Vanguard%20Set&go=Go", "stat": "medium · e.g. chestpiece 34 armor, no move penalty"}, {"name": "Caller Set", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Caller%20Set&go=Go", "stat": "lightest · mage/Eitr-focused, lowest base armor of the three"}]}, "MooseDrops": {"type": "group", "title": "Moose drops", "items": [{"name": "Moose Meat", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Moose%20Meat&go=Go", "stat": null}, {"name": "Moose Hide", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Moose%20Hide&go=Go", "stat": null}, {"name": "Moose Sinew", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Moose%20Sinew&go=Go", "stat": null}]}, "SealDrops": {"type": "group", "title": "Seal drops", "items": [{"name": "Seal Pelt", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Seal%20Pelt&go=Go", "stat": null}, {"name": "Seal Blubber", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Seal%20Blubber&go=Go", "stat": null}]}};
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'base',
+    securityLevel: 'loose',
+    themeVariables: {
+      background: 'transparent',
+      primaryColor: '#1c1c22',
+      primaryTextColor: '#eee',
+      primaryBorderColor: '#666',
+      lineColor: '#8a8a95',
+      fontFamily: 'Inter, sans-serif',
+      fontSize: '14px'
+    },
+    flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis', diagramPadding: 20 },
+    maxTextSize: 90000,
+    maxEdges: 1000
+  });
+
+  var modalOverlay = document.getElementById('modalOverlay');
+  var modalTitle = document.getElementById('modalTitle');
+  var modalList = document.getElementById('modalList');
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', function (e) { if (e.target === modalOverlay) closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+  function closeModal() { modalOverlay.classList.remove('open'); }
+
+  function openModal(title, items) {
+    modalTitle.textContent = title;
+    modalList.innerHTML = '';
+    items.forEach(function (it) {
+      var row = document.createElement('div');
+      row.className = 'modal-item';
+      var txt = document.createElement('div');
+      txt.className = 'txt';
+      var name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = it.name;
+      txt.appendChild(name);
+      if (it.stat) {
+        var stat = document.createElement('div');
+        stat.className = 'stat';
+        stat.textContent = it.stat;
+        txt.appendChild(stat);
+      }
+      var arrow = document.createElement('div');
+      arrow.className = 'arrow';
+      arrow.textContent = '\u2197';
+      row.appendChild(txt);
+      row.appendChild(arrow);
+      row.addEventListener('click', function () { window.open(it.url, '_blank'); });
+      modalList.appendChild(row);
+    });
+    modalOverlay.classList.add('open');
+  }
+
+  function setupPanZoom(wrap) {
+    const inner = wrap.querySelector('.mermaid');
+    let scale = 1, x = 0, y = 0;
+    let panning = false, didDrag = false, startX = 0, startY = 0;
+    const MIN = 0.1, MAX = 8;
+
+    function apply() {
+      inner.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + scale + ')';
+    }
+
+    function fit() {
+      const svg = inner.querySelector('svg');
+      if (!svg) return;
+      const wrapRect = wrap.getBoundingClientRect();
+      let w, h;
+      if (svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width) {
+        w = svg.viewBox.baseVal.width; h = svg.viewBox.baseVal.height;
+      } else {
+        const bb = svg.getBoundingClientRect(); w = bb.width; h = bb.height;
+      }
+      const pad = 60;
+      scale = Math.min((wrapRect.width - pad) / w, (wrapRect.height - pad) / h);
+      scale = Math.max(MIN, Math.min(scale, 1.6));
+      x = (wrapRect.width - w * scale) / 2;
+      y = (wrapRect.height - h * scale) / 2;
+      apply();
+    }
+
+    wrap.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      const rect = wrap.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+      const newScale = Math.max(MIN, Math.min(scale * factor, MAX));
+      x = mx - (mx - x) * (newScale / scale);
+      y = my - (my - y) * (newScale / scale);
+      scale = newScale;
+      apply();
+    }, { passive: false });
+
+    wrap.addEventListener('mousedown', function (e) {
+      panning = true; didDrag = false; startX = e.clientX - x; startY = e.clientY - y;
+      wrap.classList.add('grabbing');
+    });
+    window.addEventListener('mousemove', function (e) {
+      if (!panning) return;
+      if (Math.abs(e.clientX - (startX + x)) > 4 || Math.abs(e.clientY - (startY + y)) > 4) didDrag = true;
+      x = e.clientX - startX; y = e.clientY - startY;
+      apply();
+    });
+    window.addEventListener('mouseup', function () {
+      panning = false; wrap.classList.remove('grabbing');
+    });
+
+    let pinchDist = null;
+    wrap.addEventListener('touchstart', function (e) {
+      if (e.touches.length === 1) {
+        panning = true; didDrag = false;
+        startX = e.touches[0].clientX - x; startY = e.touches[0].clientY - y;
+      } else if (e.touches.length === 2) {
+        panning = false; pinchDist = touchDist(e.touches);
+      }
+    }, { passive: true });
+    wrap.addEventListener('touchmove', function (e) {
+      if (e.touches.length === 1 && panning) {
+        if (Math.abs(e.touches[0].clientX - (startX + x)) > 4 || Math.abs(e.touches[0].clientY - (startY + y)) > 4) didDrag = true;
+        x = e.touches[0].clientX - startX; y = e.touches[0].clientY - startY;
+        apply();
+      } else if (e.touches.length === 2 && pinchDist) {
+        const rect = wrap.getBoundingClientRect();
+        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+        const dist = touchDist(e.touches);
+        const factor = dist / pinchDist;
+        const newScale = Math.max(MIN, Math.min(scale * factor, MAX));
+        x = midX - (midX - x) * (newScale / scale);
+        y = midY - (midY - y) * (newScale / scale);
+        scale = newScale; pinchDist = dist;
+        apply();
+      }
+    }, { passive: true });
+    wrap.addEventListener('touchend', function (e) {
+      panning = false;
+      if (e.touches.length < 2) pinchDist = null;
+    });
+
+    function touchDist(t) {
+      const dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    wrap.querySelectorAll('.zoom-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const rect = wrap.getBoundingClientRect();
+        const cx = rect.width / 2, cy = rect.height / 2;
+        const action = btn.dataset.action;
+        if (action === 'reset') { fit(); return; }
+        const factor = action === 'in' ? 1.25 : 1 / 1.25;
+        const newScale = Math.max(MIN, Math.min(scale * factor, MAX));
+        x = cx - (cx - x) * (newScale / scale);
+        y = cy - (cy - y) * (newScale / scale);
+        scale = newScale;
+        apply();
+      });
+    });
+
+    // wire up node clicks -> either direct link or unfold modal
+    const svg = inner.querySelector('svg');
+    if (svg) {
+      svg.querySelectorAll('.node').forEach(function (nodeEl) {
+        const m = /^flowchart-(.+)-\d+$/.exec(nodeEl.id || '');
+        if (!m) return;
+        const data = NODE_DATA[m[1]];
+        if (!data) return;
+        nodeEl.addEventListener('click', function (e) {
+          if (didDrag) return;
+          e.stopPropagation();
+          if (data.type === 'single') {
+            window.open(data.url, '_blank');
+          } else {
+            openModal(data.title, data.items);
+          }
+        });
+      });
+    }
+
+    fit();
+    window.addEventListener('resize', fit);
+  }
+
+  mermaid.run({ querySelector: '.mermaid' }).then(function () {
+    setupPanZoom(document.getElementById('wrap'));
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valheim Flowchart — Ashlands</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;width:100%;height:100%;background:#20100a;overflow:hidden;font-family:'Inter',-apple-system,sans-serif;}
+
+.chart-wrap{
+  position:fixed; inset:0; overflow:hidden; cursor:grab; touch-action:none; user-select:none;
+}
+.chart-wrap.grabbing{cursor:grabbing;}
+.chart-wrap .mermaid{position:absolute; top:0; left:0; transform-origin:0 0; will-change:transform; padding:30px;}
+.chart-wrap .mermaid svg{display:block;}
+.chart-wrap .mermaid .node{cursor:pointer;}
+.chart-wrap .mermaid .node:hover rect,
+.chart-wrap .mermaid .node:hover polygon{filter:brightness(1.3);}
+
+.mermaid .nodeLabel{padding:5px 9px !important; white-space:normal !important; word-break:normal !important; overflow-wrap:break-word !important; line-height:1.35 !important;}
+.mermaid foreignObject{overflow:visible !important;}
+
+.zoom-controls{position:fixed; top:16px; right:16px; z-index:10; display:flex; flex-direction:column; gap:6px;}
+.zoom-btn{
+  width:38px; height:38px; border-radius:6px; border:1px solid rgba(255,255,255,.22);
+  background:rgba(15,15,18,.85); color:#eee; font-size:18px; line-height:1; cursor:pointer;
+  backdrop-filter:blur(4px); font-family:inherit;
+}
+.zoom-btn:hover{background:rgba(35,35,42,.92);}
+.zoom-hint{
+  position:fixed; bottom:14px; left:16px; z-index:10; font-size:12px;
+  color:rgba(255,255,255,.55); pointer-events:none; max-width:70vw;
+}
+
+/* modal for grouped nodes */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.62); backdrop-filter:blur(3px);
+  display:none; align-items:center; justify-content:center; z-index:200; padding:24px;
+}
+.modal-overlay.open{display:flex;}
+.modal-panel{
+  background:#17171d; border:1px solid rgba(255,255,255,.16); border-radius:12px;
+  max-width:540px; width:100%; max-height:78vh; overflow-y:auto;
+  box-shadow:0 24px 70px rgba(0,0,0,.55);
+}
+.modal-header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:16px 20px; border-bottom:1px solid rgba(255,255,255,.12);
+  position:sticky; top:0; background:#17171d; border-radius:12px 12px 0 0;
+}
+.modal-header h3{margin:0; font-size:16px; color:#f2f2f5; font-weight:600;}
+.modal-close{background:none; border:none; color:#9a9aa5; font-size:24px; cursor:pointer; line-height:1; padding:2px 6px;}
+.modal-close:hover{color:#fff;}
+.modal-list{padding:8px;}
+.modal-item{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:12px 14px; margin:4px; border-radius:8px; cursor:pointer;
+  border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.035);
+  transition:background .15s, border-color .15s;
+}
+.modal-item:hover{background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.22);}
+.modal-item .txt{display:flex; flex-direction:column; gap:3px; min-width:0;}
+.modal-item .name{font-weight:600; color:#eee; font-size:14px;}
+.modal-item .stat{font-size:12px; color:#8fd3ec; line-height:1.4;}
+.modal-item .arrow{color:#888; font-size:15px; flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="chart-wrap" id="wrap">
+  <div class="zoom-controls">
+    <button class="zoom-btn" data-action="in" title="Zoom in">+</button>
+    <button class="zoom-btn" data-action="out" title="Zoom out">&minus;</button>
+    <button class="zoom-btn" data-action="reset" title="Fit to view">&#10530;</button>
+  </div>
+  <div class="zoom-hint">Scroll/pinch to zoom &middot; drag to pan &middot; click a node to open its wiki page (or pick an item, for grouped nodes)</div>
+  <div class="mermaid">
+flowchart TD
+classDef resource fill:#3a1f14,stroke:#ff8a5c,color:#fbe3d4,stroke-width:1px;
+classDef mob fill:#3a1414,stroke:#e0776b,color:#f8dcd8,stroke-width:1px;
+classDef structure fill:#2a1810,stroke:#c98a5a,color:#f0dcc8,stroke-width:1px;
+classDef station fill:#33200f,stroke:#ffb627,color:#fbe9c8,stroke-width:1px;
+classDef gear fill:#2a1508,stroke:#ffb627,color:#f7e4c8,stroke-width:1px;
+classDef boss fill:#4a0e08,stroke:#ff5c3d,color:#ffe0d4,stroke-width:3px;
+classDef gate fill:#111,stroke:#999,color:#ddd,stroke-width:1px,stroke-dasharray: 4 3;
+
+DrakkarIn["Drakkar + Shield Generator<br/>(from Mistlands)"]:::gate
+Land["Land + spawn-proof<br/>(campfire/workbench blocks spawns, 20m)"]:::structure
+FlametalOre["Flametal Ore"]:::resource
+Coal["Coal"]:::resource
+BlastFurnace["Blast Furnace"]:::station
+FlametalBar["Flametal Bar"]:::resource
+Fortress["Charred Fortress"]:::structure
+Gems["Bloodstone / Iolite / Jade"]:::resource
+BellFrag["Bell Fragment ×9"]:::resource
+Trollstav["Trollstav<br/>(clears a Fortress from outside)"]:::gear
+BlackForgeA["Black Forge<br/>(Ashlands tier + Vice / Metal Cutter / Gem Cutter)"]:::station
+WeaponsA["Weapons: Splitnir · Skull Splittur · Slayer<br/>Nidhögg · Berserkir Axes · Ash Fang<br/>Ripper · Storm Star · Klossen"]:::gear
+ArmorA["Armor: Flametal Set · Ask Set<br/>Embla Set · Ashen Cape"]:::gear
+GemVariant["Gem-upgraded Variant<br/>(Bleeding / Storming / Primal)"]:::gear
+DyrnFrag["Dyrnwyn Tip / Blade / Hilt Fragments<br/>(rare finds)"]:::resource
+Dyrnwyn["Dyrnwyn (unique sword)"]:::gear
+GaldrA["Galdr Table<br/>(Ashlands upgrade)"]:::station
+StavesA["Trollstav · Dead Raiser<br/>Staff of the Wild / Fracturing / Protection"]:::gear
+Coliseum["Coliseum<br/>(found via Vegvisir)"]:::structure
+Fader["FADER"]:::boss
+FaderRelic["Fader Relic"]:::resource
+Charred["Charred Warrior / Marksman<br/>Warlock / Twitcher"]:::mob
+CharredDrops["Charred Bone · Charred Skull · Coal · Iron"]:::resource
+Morgen["Morgen"]:::mob
+MorgenDrops["Morgen Sinew · Morgen Heart"]:::resource
+Bonemaw["Bonemaw Serpent"]:::mob
+BonemawDrops["Bonemaw Tooth · Bonemaw Meat"]:::resource
+Asksvin["Asksvin"]:::mob
+AsksvinDrops["Asksvin Hide / Bladder / Neck<br/>Pelvis / Ribcage / Skull / Tail"]:::resource
+AsksvinCloak["Asksvin Cloak<br/>(movement bonus)"]:::gear
+Volture["Volture"]:::mob
+VoltureDrops["Volture Meat · Volture Egg"]:::resource
+Valkyrie["Fallen Valkyrie"]:::mob
+CelestialFeather["Celestial Feather"]:::resource
+TombReto["Tomb of Lord Reto<br/>(miniboss dungeon)"]:::structure
+LordReto["Lord Reto"]:::mob
+RetoLoot["Unique loot"]:::resource
+PutridHole["Putrid Hole<br/>(dungeon → safe rest point once cleared)"]:::structure
+StonePortal["Stone Portal<br/>(teleports Flametal ore)"]:::station
+
+DrakkarIn --> Land
+Land --> FlametalOre --> BlastFurnace
+Coal --> BlastFurnace --> FlametalBar
+Land --> Fortress
+Fortress --> Gems
+Fortress --> BellFrag
+Gems --> Trollstav
+FlametalBar --> BlackForgeA
+BlackForgeA --> WeaponsA
+BlackForgeA --> ArmorA
+Gems --> GemVariant
+WeaponsA --> GemVariant
+DyrnFrag --> Dyrnwyn
+GaldrA --> StavesA
+Fortress --> Coliseum
+BellFrag --> Coliseum
+Coliseum --> Fader
+Fader --> FaderRelic
+Charred --> CharredDrops --> BlackForgeA
+Morgen --> MorgenDrops
+Bonemaw --> BonemawDrops
+Asksvin --> AsksvinDrops --> AsksvinCloak
+Volture --> VoltureDrops
+Valkyrie --> CelestialFeather
+TombReto --> LordReto --> RetoLoot
+Land --> PutridHole
+FlametalBar --> StonePortal
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <h3 id="modalTitle"></h3>
+      <button class="modal-close" id="modalClose" title="Close">&times;</button>
+    </div>
+    <div class="modal-list" id="modalList"></div>
+  </div>
+</div>
+
+<script>
+  var NODE_DATA = {"DrakkarIn": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Drakkar&go=Go"}, "Land": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Ashlands&go=Go"}, "FlametalOre": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Flametal%20Ore&go=Go"}, "Coal": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Coal&go=Go"}, "BlastFurnace": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Blast%20Furnace&go=Go"}, "FlametalBar": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Flametal&go=Go"}, "Fortress": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Charred%20Fortress&go=Go"}, "BellFrag": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Bell%20Fragment&go=Go"}, "BlackForgeA": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Black%20Forge&go=Go"}, "GemVariant": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Bloodstone&go=Go"}, "DyrnFrag": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Dyrnwyn&go=Go"}, "Dyrnwyn": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Dyrnwyn&go=Go"}, "GaldrA": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Galdr%20Table&go=Go"}, "Coliseum": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Fader&go=Go"}, "Fader": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Fader&go=Go"}, "FaderRelic": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Fader&go=Go"}, "Morgen": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Morgen&go=Go"}, "Bonemaw": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Bonemaw%20Serpent&go=Go"}, "Asksvin": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Asksvin&go=Go"}, "AsksvinCloak": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Asksvin%20Cloak&go=Go"}, "Volture": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Volture&go=Go"}, "Valkyrie": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Fallen%20Valkyrie&go=Go"}, "CelestialFeather": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Celestial%20Feather&go=Go"}, "TombReto": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Lord%20Reto&go=Go"}, "LordReto": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Lord%20Reto&go=Go"}, "RetoLoot": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Lord%20Reto&go=Go"}, "PutridHole": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Putrid%20Hole&go=Go"}, "StonePortal": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Stone%20Portal&go=Go"}, "Trollstav": {"type": "single", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Trollstav&go=Go"}, "Gems": {"type": "group", "title": "Ashlands gems", "items": [{"name": "Bloodstone", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Bloodstone&go=Go", "stat": "gem · Bleeding variant"}, {"name": "Iolite", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Iolite&go=Go", "stat": "gem · Storming variant"}, {"name": "Jade", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Jade&go=Go", "stat": "gem · Primal variant"}]}, "WeaponsA": {"type": "group", "title": "Ashlands weapons", "items": [{"name": "Splitnir", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Splitnir&go=Go", "stat": "~145 dmg · Pierce · spear"}, {"name": "Skull Splittur", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Skull%20Splittur&go=Go", "stat": "Slash · battleaxe"}, {"name": "Slayer", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Slayer&go=Go", "stat": "170 dmg · Slash · two-handed sword"}, {"name": "Nidhögg", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Nidh%C3%B6gg&go=Go", "stat": "135 dmg · Slash · sword"}, {"name": "Berserkir Axes", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Berserkir%20Axes&go=Go", "stat": "~230 dmg · Chop + Slash · dual-wield axes"}, {"name": "Ash Fang", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Ash%20Fang&go=Go", "stat": "82 dmg · Pierce · bow"}, {"name": "Ripper", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Ripper&go=Go", "stat": "380 dmg · Chop + Pierce · crossbow"}, {"name": "Storm Star", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Storm%20Star&go=Go", "stat": "~135 dmg · Blunt · mace (Iolite line)"}, {"name": "Klossen", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Klossen&go=Go", "stat": "~135 dmg · Blunt · mace (Jade line)"}]}, "ArmorA": {"type": "group", "title": "Ashlands armor", "items": [{"name": "Flametal Armor", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Flametal%20Armor&go=Go", "stat": "132 armor (max, highest in game) · heavy, fire resist"}, {"name": "Ask Set", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Ask%20Set&go=Go", "stat": "102 armor · set bonus: -10% run/jump stamina, -20% attack stamina, +10% pierce dmg"}, {"name": "Embla Set", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Embla%20Set&go=Go", "stat": "75 armor · light/mage, high Eitr regen"}, {"name": "Ashen Cape", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Ashen%20Cape&go=Go", "stat": "cape · best armor-scaling cape"}]}, "StavesA": {"type": "group", "title": "Ashlands staves & summons", "items": [{"name": "Trollstav", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Trollstav&go=Go", "stat": "summons a friendly troll"}, {"name": "Dead Raiser", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Dead%20Raiser&go=Go", "stat": "summons a skeleton"}, {"name": "Staff of the Wild", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Staff%20of%20the%20Wild&go=Go", "stat": "Blunt + Poison"}, {"name": "Staff of Fracturing", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Staff%20of%20Fracturing&go=Go", "stat": "high tier, exact number varies by patch"}, {"name": "Staff of Protection", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Staff%20of%20Protection&go=Go", "stat": "defensive utility, shields allies"}]}, "Charred": {"type": "group", "title": "Charred Fortress garrison", "items": [{"name": "Charred Warrior", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Charred%20Warrior&go=Go", "stat": null}, {"name": "Charred Marksman", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Charred%20Marksman&go=Go", "stat": null}, {"name": "Charred Warlock", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Charred%20Warlock&go=Go", "stat": null}, {"name": "Charred Twitcher", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Charred%20Twitcher&go=Go", "stat": null}]}, "CharredDrops": {"type": "group", "title": "Charred drops", "items": [{"name": "Charred Bone", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Charred%20Bone&go=Go", "stat": null}, {"name": "Charred Skull", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Charred%20Skull&go=Go", "stat": null}, {"name": "Coal", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Coal&go=Go", "stat": null}, {"name": "Iron", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Iron&go=Go", "stat": null}]}, "MorgenDrops": {"type": "group", "title": "Morgen drops", "items": [{"name": "Morgen Sinew", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Morgen%20Sinew&go=Go", "stat": null}, {"name": "Morgen Heart", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Morgen%20Heart&go=Go", "stat": null}]}, "BonemawDrops": {"type": "group", "title": "Bonemaw drops", "items": [{"name": "Bonemaw Tooth", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Bonemaw%20Tooth&go=Go", "stat": null}, {"name": "Bonemaw Meat", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Bonemaw%20Meat&go=Go", "stat": null}]}, "AsksvinDrops": {"type": "group", "title": "Asksvin drops", "items": [{"name": "Asksvin Hide", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Asksvin%20Hide&go=Go", "stat": null}, {"name": "Asksvin Bladder", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Asksvin%20Bladder&go=Go", "stat": null}, {"name": "Asksvin Neck", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Asksvin%20Neck&go=Go", "stat": null}, {"name": "Asksvin Pelvis", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Asksvin%20Pelvis&go=Go", "stat": null}, {"name": "Asksvin Ribcage", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Asksvin%20Ribcage&go=Go", "stat": null}, {"name": "Asksvin Skull", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Asksvin%20Skull&go=Go", "stat": null}, {"name": "Asksvin Tail", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Asksvin%20Tail&go=Go", "stat": null}]}, "VoltureDrops": {"type": "group", "title": "Volture drops", "items": [{"name": "Volture Meat", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Volture%20Meat&go=Go", "stat": null}, {"name": "Volture Egg", "url": "https://valheim.weirdgloop.org/index.php?title=Special:Search&search=Volture%20Egg&go=Go", "stat": null}]}};
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'base',
+    securityLevel: 'loose',
+    themeVariables: {
+      background: 'transparent',
+      primaryColor: '#1c1c22',
+      primaryTextColor: '#eee',
+      primaryBorderColor: '#666',
+      lineColor: '#8a8a95',
+      fontFamily: 'Inter, sans-serif',
+      fontSize: '14px'
+    },
+    flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis', diagramPadding: 20 },
+    maxTextSize: 90000,
+    maxEdges: 1000
+  });
+
+  var modalOverlay = document.getElementById('modalOverlay');
+  var modalTitle = document.getElementById('modalTitle');
+  var modalList = document.getElementById('modalList');
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', function (e) { if (e.target === modalOverlay) closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+  function closeModal() { modalOverlay.classList.remove('open'); }
+
+  function openModal(title, items) {
+    modalTitle.textContent = title;
+    modalList.innerHTML = '';
+    items.forEach(function (it) {
+      var row = document.createElement('div');
+      row.className = 'modal-item';
+      var txt = document.createElement('div');
+      txt.className = 'txt';
+      var name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = it.name;
+      txt.appendChild(name);
+      if (it.stat) {
+        var stat = document.createElement('div');
+        stat.className = 'stat';
+        stat.textContent = it.stat;
+        txt.appendChild(stat);
+      }
+      var arrow = document.createElement('div');
+      arrow.className = 'arrow';
+      arrow.textContent = '\u2197';
+      row.appendChild(txt);
+      row.appendChild(arrow);
+      row.addEventListener('click', function () { window.open(it.url, '_blank'); });
+      modalList.appendChild(row);
+    });
+    modalOverlay.classList.add('open');
+  }
+
+  function setupPanZoom(wrap) {
+    const inner = wrap.querySelector('.mermaid');
+    let scale = 1, x = 0, y = 0;
+    let panning = false, didDrag = false, startX = 0, startY = 0;
+    const MIN = 0.1, MAX = 8;
+
+    function apply() {
+      inner.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + scale + ')';
+    }
+
+    function fit() {
+      const svg = inner.querySelector('svg');
+      if (!svg) return;
+      const wrapRect = wrap.getBoundingClientRect();
+      let w, h;
+      if (svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width) {
+        w = svg.viewBox.baseVal.width; h = svg.viewBox.baseVal.height;
+      } else {
+        const bb = svg.getBoundingClientRect(); w = bb.width; h = bb.height;
+      }
+      const pad = 60;
+      scale = Math.min((wrapRect.width - pad) / w, (wrapRect.height - pad) / h);
+      scale = Math.max(MIN, Math.min(scale, 1.6));
+      x = (wrapRect.width - w * scale) / 2;
+      y = (wrapRect.height - h * scale) / 2;
+      apply();
+    }
+
+    wrap.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      const rect = wrap.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+      const newScale = Math.max(MIN, Math.min(scale * factor, MAX));
+      x = mx - (mx - x) * (newScale / scale);
+      y = my - (my - y) * (newScale / scale);
+      scale = newScale;
+      apply();
+    }, { passive: false });
+
+    wrap.addEventListener('mousedown', function (e) {
+      panning = true; didDrag = false; startX = e.clientX - x; startY = e.clientY - y;
+      wrap.classList.add('grabbing');
+    });
+    window.addEventListener('mousemove', function (e) {
+      if (!panning) return;
+      if (Math.abs(e.clientX - (startX + x)) > 4 || Math.abs(e.clientY - (startY + y)) > 4) didDrag = true;
+      x = e.clientX - startX; y = e.clientY - startY;
+      apply();
+    });
+    window.addEventListener('mouseup', function () {
+      panning = false; wrap.classList.remove('grabbing');
+    });
+
+    let pinchDist = null;
+    wrap.addEventListener('touchstart', function (e) {
+      if (e.touches.length === 1) {
+        panning = true; didDrag = false;
+        startX = e.touches[0].clientX - x; startY = e.touches[0].clientY - y;
+      } else if (e.touches.length === 2) {
+        panning = false; pinchDist = touchDist(e.touches);
+      }
+    }, { passive: true });
+    wrap.addEventListener('touchmove', function (e) {
+      if (e.touches.length === 1 && panning) {
+        if (Math.abs(e.touches[0].clientX - (startX + x)) > 4 || Math.abs(e.touches[0].clientY - (startY + y)) > 4) didDrag = true;
+        x = e.touches[0].clientX - startX; y = e.touches[0].clientY - startY;
+        apply();
+      } else if (e.touches.length === 2 && pinchDist) {
+        const rect = wrap.getBoundingClientRect();
+        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+        const dist = touchDist(e.touches);
+        const factor = dist / pinchDist;
+        const newScale = Math.max(MIN, Math.min(scale * factor, MAX));
+        x = midX - (midX - x) * (newScale / scale);
+        y = midY - (midY - y) * (newScale / scale);
+        scale = newScale; pinchDist = dist;
+        apply();
+      }
+    }, { passive: true });
+    wrap.addEventListener('touchend', function (e) {
+      panning = false;
+      if (e.touches.length < 2) pinchDist = null;
+    });
+
+    function touchDist(t) {
+      const dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    wrap.querySelectorAll('.zoom-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const rect = wrap.getBoundingClientRect();
+        const cx = rect.width / 2, cy = rect.height / 2;
+        const action = btn.dataset.action;
+        if (action === 'reset') { fit(); return; }
+        const factor = action === 'in' ? 1.25 : 1 / 1.25;
+        const newScale = Math.max(MIN, Math.min(scale * factor, MAX));
+        x = cx - (cx - x) * (newScale / scale);
+        y = cy - (cy - y) * (newScale / scale);
+        scale = newScale;
+        apply();
+      });
+    });
+
+    // wire up node clicks -> either direct link or unfold modal
+    const svg = inner.querySelector('svg');
+    if (svg) {
+      svg.querySelectorAll('.node').forEach(function (nodeEl) {
+        const m = /^flowchart-(.+)-\d+$/.exec(nodeEl.id || '');
+        if (!m) return;
+        const data = NODE_DATA[m[1]];
+        if (!data) return;
+        nodeEl.addEventListener('click', function (e) {
+          if (didDrag) return;
+          e.stopPropagation();
+          if (data.type === 'single') {
+            window.open(data.url, '_blank');
+          } else {
+            openModal(data.title, data.items);
+          }
+        });
+      });
+    }
+
+    fit();
+    window.addEventListener('resize', fit);
+  }
+
+  mermaid.run({ querySelector: '.mermaid' }).then(function () {
+    setupPanZoom(document.getElementById('wrap'));
+  });
+</script>
+
+</body>
+</html>
